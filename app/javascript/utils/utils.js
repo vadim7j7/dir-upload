@@ -1,20 +1,25 @@
 import { DirectUpload } from '@rails/activestorage';
 
-let directUploadUrl;
-function getDirectUploadUrl() {
-  if (directUploadUrl) {
-    return directUploadUrl;
+function objToGetParams(attributes = {}) {
+  return Object.keys(attributes).map(key => `${key}=${decodeURIComponent(attributes[key])}`).join('&');
+}
+
+function getDirectUploadUrl(attributes = {}) {
+  const metaElement = document.querySelector('meta[name=direct-upload-url]');
+  const directUploadUrl = metaElement && metaElement.content;
+  if (!directUploadUrl) {
+    return null;
   }
 
-  const metaElement = document.querySelector('meta[name=direct-upload-url]');
-  directUploadUrl = metaElement && metaElement.content;
+  const getPrams = objToGetParams(attributes);
 
-  return directUploadUrl;
+  return `${directUploadUrl}${getPrams ? `?${getPrams}` : ''}`;
 }
 
 export class Uploader {
   constructor(file) {
-    this.upload = new DirectUpload(file, getDirectUploadUrl(), this)
+    const url = getDirectUploadUrl({ path: file.path });
+    this.upload = new DirectUpload(file, url, this);
   }
 
   uploadFile() {
