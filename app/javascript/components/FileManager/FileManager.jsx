@@ -1,8 +1,12 @@
 import React from 'react';
 
+import Uploader from '../Uploader';
+
 const FileManager = () => {
   return (
-    <div>!!!</div>
+    <div>
+      <Uploader />
+    </div>
   );
 };
 
