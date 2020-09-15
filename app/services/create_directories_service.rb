@@ -29,6 +29,7 @@ class CreateDirectoriesService
   def create_directories
     items = @path.split('/')
     items.each { |name| create_directory(name) }
+    @directory = Directory.root if items.blank?
   end
 
   def create_directory(name)
@@ -46,7 +47,7 @@ class CreateDirectoriesService
 
   def update_records
     attrs = {}
-    attrs[:key] = "#{@path}/#{@blob.key}" if @path
+    attrs[:key] = "#{@path}/#{@blob.key}" if @path.present?
     attrs[:director_id] = @directory.id if @directory
 
     @blob.update(attrs)
