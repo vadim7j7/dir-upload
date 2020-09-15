@@ -17,12 +17,14 @@ function getDirectUploadUrl(attributes = {}) {
 }
 
 export class Uploader {
-  constructor(file) {
+  constructor(file, uploadProgress) {
     const url = getDirectUploadUrl({ path: file.path });
     this.upload = new DirectUpload(file, url, this);
+    this.uploadProgress = uploadProgress;
   }
 
   uploadFile() {
+    this.uploadProgress && this.uploadProgress(0);
     this.upload.create((error, blob) => {
       if (error) {
       } else {
@@ -36,6 +38,7 @@ export class Uploader {
   }
 
   directUploadDidProgress(event) {
-    console.log(`${event.loaded * 100 / event.total}%`);
+    const percent = event.loaded * 100 / event.total
+    this.uploadProgress && this.uploadProgress(percent);
   }
 }

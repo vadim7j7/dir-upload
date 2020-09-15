@@ -2,15 +2,17 @@ import React, { useCallback } from 'react';
 
 import { Uploader } from '../../utils/utils';
 
-function uploadFile(file) {
-  const uploader = new Uploader(file);
+function uploadFile(file, index, onUploadProgress) {
+  const uploader = new Uploader(file, percent => {
+    onUploadProgress(index, percent);
+  });
   uploader.uploadFile();
 }
 
-const Upload = ({ files }) => {
+const Upload = ({ items, onUploadProgress }) => {
   const sendToServer = useCallback(() => {
-    files.forEach(file => uploadFile(file));
-  }, [files]);
+    items.forEach((item, index) => uploadFile(item.file, index, onUploadProgress));
+  }, [items]);
 
   return (
     <div className="upload">

@@ -1,17 +1,31 @@
 import React from 'react';
 
-const Item = ({ file }) => (
-  <li>
-    {file.path} - {file.size} bytes
-  </li>
-);
+const Progress = ({ progress }) => {
+  if (progress === null) {
+    return null;
+  }
 
-const Preview = ({ files }) => (
+  return (
+    <span>
+      {progress === 100 ? ' (Uploaded)' : ` (${progress}%)`}
+    </span>
+  );
+}
+
+const Item = ({ item }) => (
+  <li>
+    {item.file.path} - {item.file.size} bytes
+    {' '}
+    <Progress progress={item.uploadProgress}/>
+  </li>
+)
+
+const Preview = ({ items }) => (
   <div className="preview">
     <h4>Files</h4>
     <ul>
-      {files.map(file => (
-        <Item key={file.path} file={file} />
+      {items.map(item => (
+        <Item key={item.file.path} item={item} />
       ))}
     </ul>
   </div>
