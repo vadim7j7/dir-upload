@@ -14,17 +14,16 @@ module Api
 
     def to_hash(record, children)
       { key: record.id,
-        slug: record.slug,
         title: record.name,
         isLeaf: false,
-        files: files(record.files),
-        children: children  }
+        children: children.concat(files(record.files)) }
     end
 
     def files(items)
       items.map do |item|
-        { name: item.filename,
-          key: "file-#{item.id}" }
+        { key: "file-#{item.id}",
+          title: item.filename,
+          isLeaf: true }
       end
     end
   end
