@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import Button from 'antd/es/button';
 
 import { Uploader } from '../../utils/utils';
 
@@ -16,9 +17,9 @@ const Upload = ({ items, onUploadProgress }) => {
 
   return (
     <div className="upload">
-      <button onClick={sendToServer}>
+      <Button type="primary" onClick={sendToServer}>
         Upload
-      </button>
+      </Button>
     </div>
   );
 };
