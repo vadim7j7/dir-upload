@@ -1,22 +1,13 @@
 import React from 'react';
-
-const Progress = ({ progress }) => {
-  if (progress === null) {
-    return null;
-  }
-
-  return (
-    <span>
-      {progress === 100 ? ' (Uploaded)' : ` (${progress}%)`}
-    </span>
-  );
-}
+import Progress from 'antd/es/progress';
 
 const Item = ({ item }) => (
   <li>
     {item.file.path} - {item.file.size} bytes
     {' '}
-    <Progress progress={item.uploadProgress}/>
+    {item.uploadProgress === null ? null : (
+      <Progress percent={item.uploadProgress} />
+    )}
   </li>
 )
 

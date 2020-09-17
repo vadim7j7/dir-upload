@@ -18,13 +18,20 @@ const ViewTree = () => {
     window.open(url, '_blank');
   }, []);
 
-  useMemo(() => {
+  const loadData = useCallback(() => {
     fetch('/api/directories')
       .then(response => response.json())
       .then(({ data }) => {
         setTreeData(data);
         setLoading(false);
       })
+  }, []);
+
+  useMemo(() => {
+    loadData();
+    setInterval(() => {
+      loadData();
+    }, 2000);
   }, []);
 
   return (
