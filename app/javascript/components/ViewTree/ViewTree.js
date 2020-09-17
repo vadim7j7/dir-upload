@@ -1,10 +1,22 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import Tree from 'antd/es/tree';
 import Spin from 'antd/es/spin';
+
+const TreeItem = ({ data: { title, url } }) => (
+  url ? <a target="_blank" href={url}>{title}</a> : title
+);
 
 const ViewTree = () => {
   const [loading, setLoading] = useState(true);
   const [treeData, setTreeData] = useState([]);
+
+  const select = useCallback((_, { node: { url } }) => {
+    if (!url) {
+      return;
+    }
+
+    window.open(url, '_blank');
+  }, []);
 
   useMemo(() => {
     fetch('/api/directories')
@@ -26,6 +38,8 @@ const ViewTree = () => {
           showLine
           defaultExpandAll
           treeData={treeData}
+          titleRender={item => <TreeItem data={item} />}
+          onSelect={select}
         />
       )}
     </div>

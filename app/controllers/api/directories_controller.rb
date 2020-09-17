@@ -23,6 +23,7 @@ module Api
       items.map do |item|
         { key: "file-#{item.id}",
           title: item.filename,
+          url: url_for(item),
           isLeaf: true }
       end
     end
