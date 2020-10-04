@@ -10,6 +10,13 @@ module Api
       render(json: { data: data })
     end
 
+    def archive
+      data = params[:data]
+      ArchiveJob.perform_now(data) if data.present? && data.kind_of?(Array)
+
+      head(:no_content)
+    end
+
     private
 
     def to_hash(record, children)

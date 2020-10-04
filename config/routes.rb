@@ -4,7 +4,9 @@ Rails.application.routes.draw do
   put '/rails/active_storage/disk/:encoded_token', to: 'disk#update', as: :update_rails_disk_service_dirs
 
   namespace :api, defaults: { format: :json } do
-    resources :directories, only: :index
+    resources :directories, only: :index do
+      post :archive, on: :collection
+    end
   end
 
   root 'home#index'

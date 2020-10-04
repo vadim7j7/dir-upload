@@ -28,9 +28,8 @@ class ArchiveJob < ApplicationJob
     Zip::OutputStream.open(temp_file) do |zip|
       build_source_map(zip, data)
     end
-    temp_file.close
 
-    FileUtils.copy_file(temp_file.path, Rails.root.join('1.zip'))
+    temp_file.close
   end
 
   private
