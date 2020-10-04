@@ -30,10 +30,11 @@ class ArchiveJob < ApplicationJob
     Zip::OutputStream.open(temp_file) do |zip|
       build_source_map(zip, data)
     end
+    url = save_result(temp_file)
     temp_file.close
 
     # Send the URL to download the archive
-    send_notification(:finish, 100, { url: '' })
+    send_notification(:finish, 100, { url: url })
   end
 
   private
@@ -84,6 +85,21 @@ class ArchiveJob < ApplicationJob
       zip.put_next_entry(full_path_name)
       zip << chunk
     end
+  end
+
+  # @param[Tempfile] tempfile
+  def save_result(tempfile)
+    # TODO need to add cleaning these files in next day.
+    blob = ActiveStorage::Blob.build_after_upload(
+      io: tempfile,
+      filename: 'archive.zip',
+      content_type: 'application/zip',
+    )
+    blob.save
+
+    Rails.application.routes.url_helpers.rails_blob_path(
+      blob, host: 'http://localhost:3000',
+    )
   end
 
   def send_notification(status, percent = 0, meta = {})
