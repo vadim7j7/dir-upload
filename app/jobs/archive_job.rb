@@ -24,12 +24,16 @@ class ArchiveJob < ApplicationJob
   """
   # @param[Array] data
   def perform(data = [])
+    send_notification(:start)
+
     temp_file = Tempfile.new('archive.zip')
     Zip::OutputStream.open(temp_file) do |zip|
       build_source_map(zip, data)
     end
-
     temp_file.close
+
+    # Send the URL to download the archive
+    send_notification(:finish, 100, { url: '' })
   end
 
   private
@@ -80,5 +84,12 @@ class ArchiveJob < ApplicationJob
       zip.put_next_entry(full_path_name)
       zip << chunk
     end
+  end
+
+  def send_notification(status, percent = 0, meta = {})
+    ActionCable.server.broadcast(
+      'archiving_process',
+      { status: status, percent: percent, meta: meta }
+    )
   end
 end
