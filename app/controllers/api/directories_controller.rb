@@ -14,6 +14,7 @@ module Api
 
     def to_hash(record, children)
       { key: record.id,
+        id: record.id,
         title: record.name,
         isLeaf: false,
         children: children.concat(files(record.files)) }
