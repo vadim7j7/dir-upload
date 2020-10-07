@@ -9,6 +9,7 @@ const TreeItem = ({ data: { title, url } }) => (
 const ViewTree = () => {
   const [loading, setLoading] = useState(true);
   const [treeData, setTreeData] = useState([]);
+  const [checkedKeys, setCheckedKeys] = useState([]);
 
   const select = useCallback((_, { node: { url } }) => {
     if (!url) {
@@ -27,6 +28,11 @@ const ViewTree = () => {
       })
   }, []);
 
+  const check = useCallback(keys => {
+    setCheckedKeys(keys);
+    console.log(keys);
+  }, [treeData]);
+
   useMemo(() => {
     loadData();
     setInterval(() => {
@@ -43,10 +49,13 @@ const ViewTree = () => {
       ) : (
         <Tree
           showLine
+          checkable
           defaultExpandAll
+          checkedKeys={checkedKeys}
           treeData={treeData}
           titleRender={item => <TreeItem data={item} />}
           onSelect={select}
+          onCheck={check}
         />
       )}
     </div>
