@@ -2,6 +2,8 @@ import React, { useMemo, useState, useCallback } from 'react';
 import Tree from 'antd/es/tree';
 import Spin from 'antd/es/spin';
 
+import Download from '../Download';
+
 const TreeItem = ({ data: { title, url } }) => (
   url ? <a target="_blank" href={url}>{title}</a> : title
 );
@@ -42,6 +44,11 @@ const ViewTree = () => {
 
   return (
     <div className="view-tree">
+      <Download
+        disabled={!checkedKeys || checkedKeys.length === 0}
+        keys={checkedKeys}
+      />
+
       {loading ? (
         <div style={{ textAlign: 'center' }}>
           <Spin size="large" />

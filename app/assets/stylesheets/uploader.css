@@ -37,3 +37,11 @@
 .uploader .upload {
 
 }
+
+.view-tree {
+    padding: 0 15px;
+}
+
+.view-tree .download {
+    margin-bottom: 10px;
+}

@@ -1,35 +1,21 @@
 class ArchiveJob < ApplicationJob
   require 'zip'
 
-  """
-  :EXAMPLE:
-  [
-    241,
-    236,
-    {
-      dir: 154,
-      items: []
-    },
-    {
-      dir: 156,
-      items: [
-        240,
-        {
-          dir: 158,
-          items: [235, 242]
-        }
-      ]
-    }
-  ]
-  """
-  # @param[Array] data
-  def perform(data = [])
+  # :EXAMPLE:
+  # [158, 'file-235', 'file-242', 'file-236', 'file-238', 161]
+  #
+  # @param[Array] keys
+  def perform(keys = [])
     send_notification(:start)
+
+    fill_buf(keys)
 
     temp_file = Tempfile.new('archive.zip')
     Zip::OutputStream.open(temp_file) do |zip|
-      build_source_map(zip, data)
+      add_by_directories(zip)
+      add_by_files(zip)
     end
+
     url = save_result(temp_file)
     temp_file.close
 
@@ -39,52 +25,56 @@ class ArchiveJob < ApplicationJob
 
   private
 
-  # @param[Zip::OutputStream] zip
-  # @param[Array] data
-  # @param[String, NilClass] prev_dir
-  def build_source_map(zip, data, prev_dir = nil)
-    data.each do |record|
-      if record.kind_of?(Hash)
-        directory = Directory.find_by_id(record[:dir])
-        path = [prev_dir, directory.name].compact.join('/')
-        if record[:items].blank? # Add to the archive all directories and files from the directory.
-          build_all_sub(zip, directory, path)
-        else
-          build_source_map(zip, record[:items], path)
-        end
-      else
-        attach = ActiveStorage::Attachment.find_by_id(record)
-        blob = attach.blob
-        add_to_archive(zip, blob, prev_dir)
+  # @param[Array] keys
+  def fill_buf(keys)
+    @added = []
+    @files_ids = []
+    @directories_ids = []
+
+    keys.each do |key|
+      if key.kind_of?(String)
+        @files_ids << key.sub('file-', '').to_i
+      elsif key.kind_of?(Integer)
+        @directories_ids << key
       end
     end
   end
 
   # @param[Zip::OutputStream] zip
-  # @param[Directory] directory
-  # @param[String NilClass] path
-  def build_all_sub(zip, directory, path) # Digging all directories and files to add into the Archive
-    directory.children.each do |sub_directory|
-      path = [path, sub_directory.name].compact.join('/')
-      sub_directory.files.each do |file|
-        add_to_archive(zip, file.blob, path)
-      end
+  def add_by_files(zip)
+    ActiveStorage::Attachment.where(id: @files_ids).find_each do |file|
+      next if @added.include?(file.id)
 
-      build_all_sub(zip, sub_directory,  path)
+      directory = file.record
+      add_to_archive(zip, file, directory.path_to_str)
+    end
+  end
+
+  # @param[Zip::OutputStream] zip
+  def add_by_directories(zip)
+    Directory.where(id: @directories_ids).find_each do |directory|
+      directory.files.each do |file|
+        next if @added.include?(file.id)
+
+        add_to_archive(zip, file, directory.path_to_str)
+      end
     end
   end
 
   # Download and add the file into the Archive
   # @param[Zip::OutputStream] zip
-  # @param[ActiveStorage::Blob] blob
+  # @param[ActiveStorage::Attachment] file
   # @param[String NilClass] path
-  def add_to_archive(zip, blob, path)
+  def add_to_archive(zip, file, path)
+    blob = file.blob
     full_path_name = [path, blob.filename.to_s].compact.join('/')
 
     blob.download do |chunk|
       zip.put_next_entry(full_path_name)
       zip << chunk
     end
+
+    @added << file.id
   end
 
   # @param[Tempfile] tempfile

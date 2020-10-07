@@ -11,8 +11,8 @@ module Api
     end
 
     def archive
-      data = params[:data]
-      ArchiveJob.perform_now(data) if data.present? && data.kind_of?(Array)
+      keys = params[:keys]
+      ArchiveJob.perform_now(keys) if keys.present? && keys.kind_of?(Array)
 
       head(:no_content)
     end
