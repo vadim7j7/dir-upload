@@ -17,5 +17,6 @@ class AttachBlobService
 
   def attach_blob
     @directory.files.attach(@blob)
+    @directory.update(total_files: @directory.files.count)
   end
 end

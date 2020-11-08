@@ -24,16 +24,26 @@ module Api
         id: record.id,
         title: record.name,
         isLeaf: false,
+        meta: {
+          size: record.total_files,
+        },
         children: children.concat(files(record.files)) }
     end
 
     def files(items)
       items.map do |item|
-        { key: "file-#{item.id}",
+        {
+          key: "file-#{item.id}",
           id: item.id,
           title: item.filename,
           url: url_for(item),
-          isLeaf: true }
+          isLeaf: true,
+          meta: {
+            contentType: item.content_type,
+            created: item.created_at,
+            size: ApplicationController.helpers.number_to_human_size(item.byte_size),
+          }
+        }
       end
     end
   end

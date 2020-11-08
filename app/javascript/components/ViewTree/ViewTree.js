@@ -4,9 +4,20 @@ import Spin from 'antd/es/spin';
 
 import Download from '../Download';
 
-const TreeItem = ({ data: { title, url } }) => (
-  url ? <a target="_blank" href={url}>{title}</a> : title
-);
+const TreeItem = ({
+  data: {
+    title,
+    url,
+    isLeaf,
+    meta: { size },
+  },
+}) => (
+  <div>
+    {isLeaf ? <a target="_blank" href={url}>{title}</a> : title}
+    {' '}
+    ({size}{isLeaf ? '' : ` document${size === 1 ? '' : 's'}`})
+  </div>
+)
 
 const ViewTree = () => {
   const [loading, setLoading] = useState(true);
