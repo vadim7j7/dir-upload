@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_11_08_050431) do
+ActiveRecord::Schema.define(version: 2020_11_12_161415) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,6 +47,13 @@ ActiveRecord::Schema.define(version: 2020_11_08_050431) do
     t.index ["ancestry"], name: "index_directories_on_ancestry"
     t.index ["slug", "ancestry"], name: "index_directories_on_slug_and_ancestry", unique: true
     t.index ["slug"], name: "index_directories_on_slug"
+  end
+
+  create_table "directory_files", force: :cascade do |t|
+    t.integer "directory_id"
+    t.integer "blob_id"
+    t.index ["blob_id"], name: "index_directory_files_on_blob_id"
+    t.index ["directory_id"], name: "index_directory_files_on_directory_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

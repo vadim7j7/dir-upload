@@ -13,7 +13,6 @@ class ArchiveJob < ApplicationJob
     temp_file = Tempfile.new('archive.zip')
     Zip::OutputStream.open(temp_file) do |zip|
       add_by_directories(zip)
-      add_by_files(zip)
     end
 
     url = save_result(temp_file)
@@ -41,32 +40,21 @@ class ArchiveJob < ApplicationJob
   end
 
   # @param[Zip::OutputStream] zip
-  def add_by_files(zip)
-    ActiveStorage::Attachment.where(id: @files_ids).find_each do |file|
-      next if @added.include?(file.id)
-
-      directory = file.record
-      add_to_archive(zip, file, directory.path_to_str)
-    end
-  end
-
-  # @param[Zip::OutputStream] zip
   def add_by_directories(zip)
     Directory.where(id: @directories_ids).find_each do |directory|
-      directory.files.each do |file|
-        next if @added.include?(file.id)
+      directory.files.each do |blob|
+        next if @added.include?(blob.id)
 
-        add_to_archive(zip, file, directory.path_to_str)
+        add_to_archive(zip, blob, directory.path_to_str)
       end
     end
   end
 
   # Download and add the file into the Archive
   # @param[Zip::OutputStream] zip
-  # @param[ActiveStorage::Attachment] file
+  # @param[ActiveStorage::Blob] blob
   # @param[String NilClass] path
-  def add_to_archive(zip, file, path)
-    blob = file.blob
+  def add_to_archive(zip, blob, path)
     full_path_name = [path, blob.filename.to_s].compact.join('/')
 
     blob.download do |chunk|
@@ -74,7 +62,7 @@ class ArchiveJob < ApplicationJob
       zip << chunk
     end
 
-    @added << file.id
+    @added << blob.id
   end
 
   # @param[Tempfile] tempfile

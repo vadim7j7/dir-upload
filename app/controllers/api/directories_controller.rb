@@ -1,7 +1,7 @@
 module Api
   class DirectoriesController < ApiController
     def index
-      resource = Directory.with_attached_files
+      resource = Directory.includes(:files)
 
       data = resource.arrange_serializable do |parent, children|
         to_hash(parent, children)

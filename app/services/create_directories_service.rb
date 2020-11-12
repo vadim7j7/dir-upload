@@ -13,6 +13,7 @@ class CreateDirectoriesService
     normalize_path!
     create_directories
     update_records
+    attach_blob
   end
 
   private
@@ -48,8 +49,14 @@ class CreateDirectoriesService
   def update_records
     attrs = {}
     attrs[:key] = "#{@path}/#{@blob.key}" if @path.present?
-    attrs[:director_id] = @directory.id if @directory
 
     @blob.update(attrs)
+  end
+
+  def attach_blob
+    return if @blob.nil? || @directory.nil?
+
+    @directory.directory_files.find_or_create_by(blob_id: @blob.id)
+    @directory.update(total_files: @directory.directory_files.count)
   end
 end

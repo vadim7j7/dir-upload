@@ -1,7 +1,8 @@
 class Directory < ApplicationRecord
   has_ancestry(cache_depth: true)
 
-  has_many_attached :files
+  has_many :directory_files, dependent: :destroy
+  has_many :files, through: :directory_files, source: :blob
 
   validates :name, :slug, presence: true
 
