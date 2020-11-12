@@ -6,7 +6,10 @@ module Api
       service = CreateDirectoriesService.new(blob, params[:path].to_s)
       service.call
 
-      render(json: direct_upload_json(blob))
+      data = direct_upload_json(blob)
+      data[:record] = service.record_id
+
+      render(json: data)
     end
   end
 end

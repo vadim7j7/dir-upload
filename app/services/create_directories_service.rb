@@ -1,10 +1,13 @@
 class CreateDirectoriesService
+  attr_reader :record_id
+
   # @param[ActiveStorage::Blob] blob
   # @param[String] path
   def initialize(blob, path)
     @blob      = blob
     @path      = path
     @directory = nil
+    @record_id = nil
   end
 
   def call
@@ -56,7 +59,9 @@ class CreateDirectoriesService
   def attach_blob
     return if @blob.nil? || @directory.nil?
 
-    @directory.directory_files.find_or_create_by(blob_id: @blob.id)
+    record = @directory.directory_files.find_or_create_by(blob_id: @blob.id)
+    @record_id = record.id
+
     @directory.update(total_files: @directory.directory_files.count)
   end
 end

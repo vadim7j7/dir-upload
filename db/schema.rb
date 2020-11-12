@@ -52,6 +52,7 @@ ActiveRecord::Schema.define(version: 2020_11_12_161415) do
   create_table "directory_files", force: :cascade do |t|
     t.integer "directory_id"
     t.integer "blob_id"
+    t.integer "status", default: 0
     t.index ["blob_id"], name: "index_directory_files_on_blob_id"
     t.index ["directory_id"], name: "index_directory_files_on_directory_id"
   end
