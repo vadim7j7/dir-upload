@@ -1,50 +1,48 @@
 import React, { useMemo, useState, useCallback } from 'react';
-import Tree from 'antd/es/tree';
+import Table from 'antd/es/table';
 import Spin from 'antd/es/spin';
 
 import Download from '../Download';
 
-const TreeItem = ({
-  data: {
-    title,
-    url,
-    isLeaf,
-    meta: { size },
+const columns = [
+  {
+    title: 'Name',
+    dataIndex: 'title',
+    key: 'title',
+    render: (title, { isLeaf, url }) => {
+      if (isLeaf) {
+        return <a href={url} target="_blank">{title}</a>;
+      }
+      return title
+    }
   },
-}) => (
-  <div>
-    {isLeaf ? <a target="_blank" href={url}>{title}</a> : title}
-    {' '}
-    ({size}{isLeaf ? '' : ` document${size === 1 ? '' : 's'}`})
-  </div>
-)
+  {
+    title: 'Size',
+    dataIndex: 'meta',
+    render: ({ size }, { isLeaf }) => {
+      const suf = isLeaf ? '' : ` document${size === 1 ? '' : 's'} `;
+      return `${(size ? `${size}${suf}` : '-')}`
+    },
+  }
+]
 
 const ViewTree = () => {
   const [loading, setLoading] = useState(true);
-  const [treeData, setTreeData] = useState([]);
+  const [data, setData] = useState([]);
   const [checkedKeys, setCheckedKeys] = useState([]);
 
-  const select = useCallback((_, { node: { url } }) => {
-    if (!url) {
-      return;
-    }
-
-    window.open(url, '_blank');
-  }, []);
+  const check = useCallback(keys => {
+    setCheckedKeys(keys);
+  }, [data]);
 
   const loadData = useCallback(() => {
     fetch('/api/directories')
       .then(response => response.json())
       .then(({ data }) => {
-        setTreeData(data);
+        setData(data);
         setLoading(false);
       })
   }, []);
-
-  const check = useCallback(keys => {
-    setCheckedKeys(keys);
-    console.log(keys);
-  }, [treeData]);
 
   useMemo(() => {
     loadData();
@@ -65,19 +63,20 @@ const ViewTree = () => {
           <Spin size="large" />
         </div>
       ) : (
-        <Tree
-          showLine
-          checkable
-          defaultExpandAll
-          checkedKeys={checkedKeys}
-          treeData={treeData}
-          titleRender={item => <TreeItem data={item} />}
-          onSelect={select}
-          onCheck={check}
+        <Table
+          expandable={{
+            defaultExpandAllRows: true,
+          }}
+          rowSelection={{
+            selectedRowKeys: checkedKeys,
+            onChange: check
+          }}
+          columns={columns}
+          dataSource={data}
         />
       )}
     </div>
   );
-};
+}
 
-export default ViewTree
+export default ViewTree;
