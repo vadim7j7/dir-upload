@@ -13,6 +13,7 @@ class ArchiveJob < ApplicationJob
     temp_file = Tempfile.new('archive.zip')
     Zip::OutputStream.open(temp_file) do |zip|
       add_by_directories(zip)
+      add_by_files(zip)
     end
 
     url = save_result(temp_file)
@@ -47,6 +48,15 @@ class ArchiveJob < ApplicationJob
 
         add_to_archive(zip, blob, directory.path_to_str)
       end
+    end
+  end
+
+  # @param[Zip::OutputStream] zip
+  def add_by_files(zip)
+    DirectoryFile.where(blob_id: @files_ids).find_each do |record|
+      next if @added.include?(record.blob_id)
+
+      add_to_archive(zip, file.blob, record.directory.path_to_str)
     end
   end
 
